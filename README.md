@@ -2,7 +2,7 @@ IR Send and Receive
 ---------------------------------------------------------
 
 
-<img src=https://raw.githubusercontent.com/SeeedDocument/Grove-Infrared_Emitter/master/img/Grove-Infrared_Emitter.jpg width=400>
+<img src=https://raw.githubusercontent.com/SeeedDocument/Grove-Infrared_Emitter/master/img/main.jpg width=400>
 
 [Grove - Infrared Emitter](https://www.seeedstudio.com/Grove-Infrared-Emitter-p-993.html)
 
@@ -24,18 +24,20 @@ This library include 2parts, ir send and ir receive.
 
 You can use this function to send a buf:
 
-    void Send(unsigned char *dta_buf, unsigned char ifreq);
+```cpp
+void Send(unsigned char *dta_buf, unsigned char ifreq);
+```
 
 
-- dta_buf[0] len of the buf(not include dta_buf[0])
-- dta_buf[1] start signal high time
-- dta_buf[2] start signal low time
-- dta_buf[3] bit high time
-- dta_buf[4] bit low time
-- dta_buf[5] data lenght(how many byte to send)
-- dta_buf[6] dta_buf[n] : data to send
+- `dta_buf[0]` len of the buf(not include dta_buf[0])
+- `dta_buf[1]` start signal high time
+- `dta_buf[2]` start signal low time
+- `dta_buf[3]` bit high time
+- `dta_buf[4]` bit low time
+- `dta_buf[5]` data lenght(how many byte to send)
+- `dta_buf[6]` to `dta_buf[n]` : data to send
 
-- ifreq: frequence, eg:38(means 38k)
+- `ifreq`: frequence, e.g. 38 (means 38k)
 
 ![](http://www.seeedstudio.com/wiki/images/4/40/Ir_time.jpg)
 
@@ -44,15 +46,21 @@ You can use this function to send a buf:
 
 **Initialize:**
 
-    IR.Init(pin);		// pin to receive
+```cpp
+IR.Init(pin);		// pin to receive
+```
 
 **Check Data:**
 
-	IR.IsDta();			// if get data, return 1
+```cpp
+IR.IsDta();			// if get data, return 1
+```
 
 **Receive Data:**
 
-	IR.Recv(unsigned char *dta);	
+```cpp
+IR.Recv(unsigned char *dta);
+```
 
 
 
