@@ -11,7 +11,7 @@
 const int ir_freq = 38;                 // 38k
 
 const int buttonPinModeA = 2;
-const int buttonPinModeB = 3;
+const int buttonPinModeB = 4;
 
 unsigned char dtaSend[20];
 void dtaInit()
@@ -29,6 +29,8 @@ void dtaInit()
 
 void setup()
 {
+    pinMode(buttonPinModeA, INPUT);
+    pinMode(buttonPinModeB, INPUT);
     dtaInit();
 }
 
