@@ -35,7 +35,7 @@ void setup()
 }
 
 void changeMode(char mode){
-  dataSend[BID_DATA+0] = mode;
+  dtaSend[BIT_DATA+0] = mode;
 }
 
 void loop(){
