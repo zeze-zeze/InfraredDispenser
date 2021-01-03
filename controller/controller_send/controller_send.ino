@@ -8,6 +8,8 @@
 #define BIT_DATA_LEN    5
 #define BIT_DATA        6
 
+// TX = D3, VCC, GND
+
 const int ir_freq = 38;                 // 38k
 
 const int buttonPinModeA = 2;
