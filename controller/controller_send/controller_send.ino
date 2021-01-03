@@ -29,6 +29,7 @@ void dtaInit()
 
 void setup()
 {
+    Serial.begin(9600);
     pinMode(buttonPinModeA, INPUT);
     pinMode(buttonPinModeB, INPUT);
     dtaInit();
@@ -42,12 +43,18 @@ void loop(){
     int readingA = digitalRead(buttonPinModeA), readingB = digitalRead(buttonPinModeB);
     delay(500);
     if(readingA == HIGH){
+      Serial.println("send A");
       changeMode('A');
       IR.Send(dtaSend, 38); 
     }
     else if(readingB == HIGH){
+      Serial.println("send B");
       changeMode('B');
       IR.Send(dtaSend, 38);
     }
-    delay(1000);
+    else{
+      Serial.println("send C");
+      changeMode('C');
+      IR.Send(dtaSend, 38);
+    }
 }
