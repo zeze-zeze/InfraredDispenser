@@ -7,10 +7,10 @@ String getStr;
 String IP = "8519a1aaf29f.ngrok.io";
 
 //請輸入自己WiFi熱點的名稱
-#define SSID "zeze's router" // Use you own SSID
+#define SSID "XXXX" // Use you own SSID
 
 //請輸入自己WiFi熱點的密碼
-#define PASS "asusrouterau4a83" // Use you own Password
+#define PASS "XXXX" // Use you own Password
   
   
 void setup() {
