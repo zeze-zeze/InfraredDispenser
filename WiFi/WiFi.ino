@@ -1,97 +1,110 @@
 #include <SoftwareSerial.h>
-#define WiFi_TX 2
-#define WiFi_RX 3
+#define WiFi_TX 8
+#define WiFi_RX 7
 SoftwareSerial WiFi_Serial(WiFi_TX,WiFi_RX);
 int flag = 0;
+String getStr;
+String IP = "8519a1aaf29f.ngrok.io";
 
 //請輸入自己WiFi熱點的名稱
-#define SSID "XXXX"
+#define SSID "zeze's router" // Use you own SSID
 
 //請輸入自己WiFi熱點的密碼
-#define PASS "XXXX"
-
-#define IP "c3397c72664b.ngrok.io"
-String GET = "GET /dispender?";
-
+#define PASS "asusrouterau4a83" // Use you own Password
+  
+  
 void setup() {
-  Serial.begin(9600);
-  WiFi_Serial.begin(115200);
-  while(flag == 0){
-    WiFi_Send("AT"); //測試指令-AT
-    delay(1000);
-    if(WiFi_Serial.find("OK")){
-      Serial.println("RECEIVED: OK");
-      WiFi_Send("AT+CIPMUX=0"); //設定為單連線型態
-      delay(1000);
-      if(WiFi_Serial.find("OK")){
-        Serial.println("RECEIVED: OK");
-      }
-    while(!connectWiFi()); //將Wi-Fi模組連上可連至外網的Wi-Fi AP
-    flag = 1; 
-  }
-    else{
-      Serial.println("NO RESPONSE!");
-    } 
-  }
+   Serial.begin(9600);          // PC Arduino Serial Monitor
+   WiFi_Serial.begin(115200);   // Arduino to ESP01 Communication // RXD - TX1, TXD - RX1
+   while(!esp01Check());        // Check if ESP01 AT command works or not
+   while(!connectWiFi());       // Check WiFi connection
+   getStr = "GET /dispender?temperature=50&weight=40 HTTP/1.0\n";
+   getStr += "Host: " + IP + "\n";
+   getStr += "Connection: Keep-Alive\n\n";
+   talkBackSendCommand(getStr); // Sent Get request via ESP01 
 }
 
 void loop() {
-  updateDHT11("30", "40"); //將溫濕度資料傳至雲端平台
-  delay(5000);
+  // put your main code here, to run repeatedly:
+
 }
 
-void updateDHT11(String T, String W){
-  String cmd = "AT+CIPSTART=\"TCP\",\""; //建立TCP連線
-  cmd += IP;
-  cmd += "\",80";
-  WiFi_Send(cmd);
-  delay(1000);
-  if(WiFi_Serial.find("ERROR")){
-    Serial.println("RECEIVED: TCP Connect Error");
-    return;
-  }
-  cmd = GET + "temperature=" + T + "&weight=" + W +"\r\n";
-  WiFi_Serial.print("AT+CIPSEND="); //傳送資料的指令
-  WiFi_Serial.println(cmd.length()); //資料的長度
-  if(WiFi_Serial.find(">")){ //確定WiFi模組有接收到指令
-    Serial.print(">");
-    Serial.print(cmd);
-    WiFi_Serial.print(cmd); //傳送資料
-    delay(1000);
-    if(WiFi_Serial.find("OK")){
-      Serial.println("RECEIVED: SEND OK");
-    }
-    else{
-      Serial.println( "RECEIVED: SEND Error_2" );
-    }
-  }
-  else{
-    Serial.println( "RECEIVED: SEND Error" );
-  }
-}
-
-void WiFi_Send(String cmd){
-  Serial.print("SEND: ");
-  WiFi_Serial.println(cmd);
-  Serial.println(cmd);
-}
-
-boolean connectWiFi(){
-  WiFi_Serial.println("AT+CWMODE=1"); //WiFi 應用型態為Station型態
-  delay(1000);
-  String cmd="AT+CWJAP=\""; //加入接入點(與WiFi AP連線)
-  cmd+=SSID;
-  cmd+="\",\"";
-  cmd+=PASS;
-  cmd+="\"";
-  WiFi_Send(cmd);
-  delay(1000);
-  if(WiFi_Serial.find("OK")){
-    Serial.println("RECEIVED: OK");
+bool esp01Check(){
+  WiFi_Serial.println("AT");
+  delay(100);
+  if (WiFi_Serial.find("OK")){
+    Serial.println("esp01 check");
     return true;
   }
-  else{
-    Serial.println("RECEIVED: Error");
-    return false;
+  else {
+    Serial.println("esp01 is running");
+    return false; 
   }
+  delay(1000);
 }
+
+
+boolean connectWiFi() {
+    // Connect to Wifi Function
+    WiFi_Serial.println("AT+CWMODE=1\r\n"); // Setting Mode = 1
+    delay(2000);
+    String cmd = "AT+CWJAP=\"";         // Connect to WiFi
+    cmd += SSID;                   // Replace ssid_name here
+    cmd += "\",\"";
+    cmd += PASS;                // Replace password here
+    cmd += "\"\r\n";              
+    
+    Serial.println(cmd);                // Display Connect Wifi Command on PC
+    WiFi_Serial.println(cmd);               // send Connect WiFi command to Rx1, Tx1 
+    
+    delay(10000);                       // wait for 10 sec
+  
+    WiFi_Serial.println("AT+CWJAP?");       // Verify Connected WiFi
+    delay(100);
+    if(WiFi_Serial.find("+CWJAP"))        
+    {
+      Serial.println("OK, Connected to WiFi.");         // Display Confirmation msg on PC
+      return true;
+    }
+    else
+    {
+      Serial.println("Can not connect to the WiFi.");   // Display Error msg on PC
+      return false;
+    }
+   
+}
+
+
+void talkBackSendCommand(String getStr){
+   WiFi_Serial.println("AT+CIPMUX=0");
+   delay(1000);
+   if (WiFi_Serial.find("OK")){
+    Serial.println("CIPMUX OK");
+   }
+   String cmd = "AT+CIPSTART=\"TCP\",\"";   // TCP connection with https://thingspeak.com server
+    cmd += IP;
+    cmd += "\",80";
+    WiFi_Serial.println(cmd);                  // Send above command to Rx1, Tx1
+    Serial.println(cmd);
+    if(WiFi_Serial.find("OK")){                // If returns error in TCP Connection{ ]
+      Serial.println("AT+CIPSTART OK");
+      cmd = "AT+CIPSEND="; 
+      cmd += String(getStr.length());
+      cmd+="\r\n";
+      WiFi_Serial.println(cmd); 
+      if(WiFi_Serial.find(">")){
+        Serial.println("AT+CIPSEND OK");
+        Serial.println(getStr);
+        WiFi_Serial.println(getStr); //傳送資料
+      }
+      else{
+        Serial.println("AT+CIPSEND Fail");
+        while(1);
+      }       
+    }
+    else{                                   // If returns error in TCP Connection
+      Serial.println("AT+CIPSTART Fail");   // Display error msg to PC
+      while(1);
+    }
+    WiFi_Serial.println("AT+CIPCLOSE");  // Close the connection
+}   
